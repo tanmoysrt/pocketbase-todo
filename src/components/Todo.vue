@@ -4,8 +4,11 @@
         <p :class="{
             'line-through': completed
         }">{{ title }}</p>
-        <LButton size="small" class="min-w-[140px]" v-if="completed" severity="warn">Mark as Pending</LButton>
-        <LButton size="small" class="min-w-[140px]" v-else>Mark as Completed</LButton>
+        <LButton size="small" class="min-w-[140px]" v-if="completed" severity="warn" @click="setStatus(false)"
+            :loading="isLoading">Mark as
+            Pending</LButton>
+        <LButton size="small" class="min-w-[140px]" v-else @click="setStatus(true)" :loading="isLoading">Mark as
+            Completed</LButton>
 
     </div>
 </template>
@@ -19,5 +22,24 @@ export default {
     components: {
         LButton: Button,
     },
+    data() {
+        return {
+            isLoading: false,
+        }
+    },
+    methods: {
+        async setStatus(isCompleted) {
+            this.isLoading = true;
+            try {
+                await this.$pb.collection('todos').update(this.id, {
+                    "completed": isCompleted
+                });
+            } catch (error) {
+                alert(error.response?.message ?? "Unknown Error")
+            } finally {
+                this.isLoading = false;
+            }
+        }
+    }
 }
 </script>
