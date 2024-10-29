@@ -43,6 +43,24 @@ export default {
     },
     mounted() {
         this.loadData();
+        this.$pb.collection('todos').subscribe('*', (e) => {
+            if (e.action === 'create') {
+                this.data = [e.record, ...this.data];
+            } else if (e.action === 'update') {
+                this.data = this.data.map(record => {
+                    if (record.id === e.record.id) {
+                        return e.record;
+                    } else {
+                        return record;
+                    }
+                });
+            } else if (e.action === 'delete') {
+                this.data = this.data.filter(record => record.id !== e.record.id);
+            }
+        }, {});
+    },
+    unmounted() {
+        this.$pb.collection('todos').unsubscribe();
     },
     methods: {
         async addTodo() {
